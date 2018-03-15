@@ -1,0 +1,418 @@
+<!--
+/**
+ * Created by PhpStorm.
+ * User: elly.permana
+ * Date: 6/2/2016
+ * Time: 10:27 AM
+ */
+-->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Simulai Kredit</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css">
+
+    <style>
+        .zebra-table{
+            box-shadow: 0 2px 3px 1px #ddd;
+            overflow:hidden;
+            border:10px solid #fff;
+            border-collapse: collapse;
+        }
+
+        .zebra-table th,.zebra-table td{
+            vertical-align: top;
+            padding: 8px 5px;
+            text-align: left;
+            margin: 0;
+        }
+        .zebra-table tbody th{
+            background: #34495E;
+            color: #fff;
+        }
+        .zebra-table tbody tr:nth-child(odd){
+            background:#DADFE1;
+        }
+    </style>
+    <script type="text/javascript">
+        /*	function cekuser(a){
+         re =/^[A-Za-z]{1,}$/;
+         return re.test(a);
+         }
+
+         function validasi(){
+         var nama = document.getElementById("nama").value;
+         if(nama ==""){
+         alert("Nama harus diisi!!");
+         }else if(!cekuser(nama)){
+         alert("Nama harus berupa huruf!!");
+         nama.focus();
+         return false;
+         }
+         }*/
+
+        function ValidateNama() {
+            var characterOnly = document.getElementById('nama').value;
+            if(characterOnly.search(/^[a-zA-Z]+$/) === -1){
+                alert("Inputan hanya huruf!!");
+                document.getElementById('nama').value="";
+            }
+
+        }
+
+        function cetak() {
+            print();
+        }
+
+        function validAngka(a)
+        {
+            if(!/^[0-9.]+$/.test(a.value))
+            {
+                a.value = a.value.substring(0,a.value.length-1000);
+            }
+        }
+
+        function printDiv(elementId) {
+            var y = document.getElementById('print-area1').value;
+            var x = document.getElementById(elementId).innerHTML;
+            window.frames["print_frame"].document.title = document.title;
+            window.frames["print_frame"].document.body.innerHTML = '<style>' + y + '</style>' + x;
+            window.frames["print_frame"].window.focus();
+            window.frames["print_frame"].window.print();
+
+        }
+
+    </script>
+
+</head>
+<body>
+<?php
+function buatrp($angka){
+    $jadi ="Rp. " .number_format($angka,2,',','.');
+    return $jadi;
+}
+?>
+
+<div class="container">
+    <h2 class="section-title"><span>Simulasi Kredit</span></h2>
+    <form action="" method="POST">
+        <b>Nama Nasabah : </b>
+        <input name="nama" class="form-control" id="nama" value="<?php echo $nama;?>" onkeyup="ValidateNama()" placeholder="--Nama Nasabah--" required>
+
+        <b>Jumlah Pinjaman : </b>
+        <input name="jumlah" id ="jumlah" class="form-control" value="<?php echo $jumlah?>" onkeyup="validAngka(this)" placeholder="--Pinjaman--" required>
+
+        <b>Rate : </b>
+        <input name="rate" id="rate" class="form-control" value="<?php echo $rate?>" onkeyup="validAngka(this)" placeholder="--Bunga dalam setahun--" required>
+
+        <b>Lama Peminjaman : </b>
+        <input name="lama" id="lama" class="form-control" value="<?php echo $lama?>" onkeyup="validAngka(this)" placeholder="--Jumlah Bulan--" required>
+
+        <b>Tipe Jenis Bunga : </b>
+        <select name="jns_bng" id="jns_bng" class="form-control" required>
+            <option value ="0">-Pilih Jenis Bunga-</option>
+            <option value ="1">Flat</option>
+            <option value ="2">Effektif</option>
+            <option value ="3">Anuitas</option>
+        </select>
+
+        <input type="submit" name="btn-kalkulasi" class="btn btn-ku" value="Kalkulasi">
+
+    </form>
+    <hr>
+
+    <div id="print-area1">
+        <?php
+        if (isset($_POST['btn-kalkulasi'])) {
+        $jumlah_pinjaman = $_POST['jumlah'];
+        $lama_pinjaman = $_POST['lama'];
+        $nama = $_POST['nama'];
+        $rate = $_POST['rate'];
+        $jns_bng = $_POST['jns_bng'];
+        $bulan = 12;
+
+        if($jns_bng ==1 ){
+            $bunga_perbulan=$rate/12;
+            $bunga_rp = $jumlah_pinjaman/$rate;
+            $angsuran_bunga=($jumlah_pinjaman*$bunga_perbulan)/100;
+            $angsuran_pokok = $jumlah_pinjaman/$lama_pinjaman;
+            $jumlah = $angsuran_pokok+$angsuran_bunga;
+            $type = 'Bunga Flat';
+
+            ?>
+
+            <?php
+            echo "<pre>";
+            echo "Nama Nasabah             = "."<b>".$nama."</b>"."<br>";
+            echo "Jumlah Pinjaman          = "."<b>".buatrp($jumlah_pinjaman)."</b>"."<br>";
+            echo "Lama Pinjaman            = "."<b>".$lama_pinjaman." Bulan"."</b>"."<br>";
+            echo "Bunga per tahun          = "."<b>".$rate.' %'."</b>"."<br>";
+            echo "Jenis Bunga              = "."<b>".$type."</b>".'<br>';
+            echo "<br>";
+            //echo "Angsuran Pokok Per Bulan = "."<b>".buatrp($angsuran_pokok)."</b>"."<br>";
+            //echo "Angsuran Bunga Per Bulan = "."<b>".buatrp($angsuran_bunga)."</b>"."<br>";
+            //echo "                           _____________________ ( + )<br>";
+            //echo "Total Angsuran Per Bulan = "."<b>".buatrp($jumlah)."</b>";
+            echo "</pre>";
+
+            $row=$jumlah_pinjaman;
+            $no=1;
+            ?>
+            <table class="table zebra-table" id="ell">
+                <tr>
+                    <th></th>
+                    <th></th>
+                    <th>Tabel Simulasi Kredit</th>
+                    <th></th>
+                    <th></th>
+                </tr>
+                <tr>
+                    <th>Angsuran ke -</th>
+                    <th>Angsuran Pokok</th>
+                    <th>Angsuran Bunga</th>
+                    <th>Total Angsuran</th>
+                    <th>Baki Debet</th>
+                </tr>
+                <tr>
+                    <td>0</td>
+                    <td>0</td>
+                    <td>0</td>
+                    <td>0</td>
+                    <td><b><?php echo buatrp($jumlah_pinjaman);?></b></td>
+                </tr>
+
+                <?php while ( $row > 1) { $row=$row-$angsuran_pokok;
+                    if($row < 0){
+                        $totdong = 0;
+                    }else{
+                        $totdong = $row;
+                    }
+                    ?>
+
+
+
+                    <tr>
+                        <td><?php echo $no++;?></td>
+                        <td><?php echo buatrp($angsuran_pokok);?></td>
+                        <td><?php echo buatrp($angsuran_bunga);?></td>
+                        <td><?php echo buatrp($jumlah);?></td>
+                        <td><?php echo buatrp($totdong);?></td>
+                    </tr>
+
+                <?php } //end of while
+                $tot_ang_pokok=$angsuran_pokok*$lama_pinjaman;
+                $tot_ang_bunga=$angsuran_bunga*$lama_pinjaman;
+                $tot_jumlah=$jumlah*$lama_pinjaman;
+                ?>
+                <tr>
+                    <td></td>
+                    <td><b><?php echo buatrp($tot_ang_pokok);?></b></td>
+                    <td><b><?php echo buatrp($tot_ang_bunga);?></b></td>
+                    <td><b><?php echo buatrp($tot_jumlah);?></b></td>
+                    <td></td>
+                </tr>
+            </table>
+
+            <?php
+
+        }else if($jns_bng == 2){
+            $totbung = 0;
+            $angsuran_bunga = (($jumlah_pinjaman * $rate)/100) * (30/360);
+            $angsuran_pokok =$jumlah_pinjaman/$lama_pinjaman;
+            //$jumlah = $angsuran_pokok+$angsuran_bunga;
+            $type = 'Bunga Efektif';
+
+
+            echo "<pre>";
+            echo "Nama Nasabah             = "."<b>".$nama."</b>"."<br>";
+            echo "Jumlah Pinjaman          = "."<b>".buatrp($jumlah_pinjaman)."</b>"."<br>";
+            echo "Lama Pinjaman            = "."<b>".$lama_pinjaman." Bulan"."</b>"."<br>";
+            echo "Bunga per tahun          = "."<b>".$rate.' %'."</b>"."<br>";
+            echo "Jenis Bunga              = "."<b>".$type."</b>".'<br>';
+            echo "<br>";
+            //echo "Angsuran Pokok Per Bulan = "."<b>".buatrp($angsuran_pokok)."</b>"."<br>";
+            //echo "Angsuran Bunga Per Bulan = "."<b>".buatrp($angsuran_bunga)."</b>"."<br>";
+            //echo "                           _____________________ ( + )<br>";
+            //echo "Total Angsuran Per Bulan = "."<b>".buatrp($jumlah)."</b>";
+            echo "</pre>";
+
+            $row=$jumlah_pinjaman;
+            $no=1;
+            $flower = $angsuran_bunga;
+            ?>
+
+            <table class="table zebra-table" id="ell">
+                <tr>
+                    <th>Angsuran ke -</th>
+                    <th>Angsuran Pokok</th>
+                    <th>Angsuran Bunga</th>
+                    <th>Total Angsuran</th>
+                    <th>Baki Debet</th>
+                </tr>
+                <tr>
+                    <td>0</td>
+                    <td>0</td>
+                    <td>0</td>
+                    <td>0</td>
+                    <td><b><?php echo buatrp($jumlah_pinjaman);?></b></td>
+                </tr>
+
+                <?php while ( $row > 1) {
+
+                    if($row == $jumlah_pinjaman ){
+                        $flower = $angsuran_bunga;
+                        $jumlah = $angsuran_pokok+$angsuran_bunga;
+                    }else {
+                        $flower = (($row * $rate) / 100) / 12;
+                        $jumlah = $angsuran_pokok+$flower;
+                    }
+                    $row=$row-$angsuran_pokok;
+                    $totbung = $totbung + $flower;
+
+
+                    if($row < 0){
+                        $totdong = 0;
+                    }else {
+                        $totdong = $row;
+                    }
+                    ?>
+
+                    <tr>
+                        <td><?php echo $no++;?></td>
+                        <td><?php echo buatrp($angsuran_pokok);?></td>
+                        <td><?php echo buatrp($flower);?></td>
+                        <td><?php echo buatrp($jumlah);?></td>
+                        <td><?php echo buatrp($totdong);?></td>
+                    </tr>
+
+                <?php } //end of while
+
+                $tot_ang_pokok=$angsuran_pokok*$lama_pinjaman;
+                $tot_ang_bunga=$totbung;
+                $tot_jumlah=$tot_ang_bunga+$tot_ang_pokok;
+                ?>
+                <tr>
+                    <td></td>
+                    <td><b><?php echo buatrp($tot_ang_pokok);?></b></td>
+                    <td><b><?php echo buatrp($tot_ang_bunga);?></b></td>
+                    <td><b><?php echo buatrp($tot_jumlah);?></b></td>
+                    <td></td>
+                </tr>
+            </table>
+            <?php
+        }else if($jns_bng == 3){
+            $tampok = 0;
+            $totbung = 0;
+            $a = $jumlah_pinjaman*(($rate/100)/12);
+            $b = 1-1/(exp($lama_pinjaman*log(1+(($rate/100)/12)))) ;
+            $anuitas = $a/$b;
+
+            $angsuran_bunga = ($jumlah_pinjaman*($rate/100))/12;
+            $type = 'Bunga Anuitas';
+
+
+
+            echo "<pre>";
+            echo "Nama Nasabah             = "."<b>".$nama."</b>"."<br>";
+            echo "Jumlah Pinjaman          = "."<b>".buatrp($jumlah_pinjaman)."</b>"."<br>";
+            echo "Lama Pinjaman            = "."<b>".$lama_pinjaman." Bulan"."</b>"."<br>";
+            echo "Bunga per tahun          = "."<b>".$rate.' %'."</b>"."<br>";
+            echo "Nilai Anuitas            = "."<b>".buatrp($anuitas)."</b>"."<br>";
+            echo "Jenis Bunga              = "."<b>".$type."</b>"."<br>";
+            echo "<br>";
+            echo "</pre>";
+
+            $row=$jumlah_pinjaman;
+            $no=1;
+            ?>
+            <table class="table zebra-table" id="ell">
+                <tr>
+                    <th>Angsuran ke -</th>
+                    <th>Angsuran Pokok</th>
+                    <th>Angsuran Bunga</th>
+                    <th>Total Angsuran</th>
+                    <th>Baki Debet</th>
+                </tr>
+                <tr>
+                    <td>0</td>
+                    <td>0</td>
+                    <td>0</td>
+                    <td>0</td>
+                    <td><b><?php echo buatrp($jumlah_pinjaman);?></b></td>
+                </tr>
+
+                <?php while ( $row > 1) {
+                    if($row == $jumlah_pinjaman ){
+                        $flower = $angsuran_bunga;
+                        $angsuran_pokok =$anuitas-$angsuran_bunga;
+                        $jumlah = $angsuran_pokok+$angsuran_bunga;
+
+                    }else {
+                        $flower = (($row * $rate) / 100) / 12;
+                        $angsuran_pokok =$anuitas-$flower;
+                        $jumlah = $angsuran_pokok+$flower;
+                    }
+                    $row=$row-$angsuran_pokok;
+                    $tampok =  $tampok+$angsuran_pokok;
+                    $totbung = $totbung + $flower;
+
+                    if($row <= 0){
+                        $totdong = 0;
+                    }else{
+                        $totdong = $row;
+                    }
+                    ?>
+                    <tr>
+                        <td><?php echo $no++;?></td>
+                        <td><?php echo buatrp($angsuran_pokok);?></td>
+                        <td><?php echo buatrp($flower);?></td>
+                        <td><?php echo buatrp($anuitas);?></td>
+                        <td><?php echo buatrp($totdong);?></td>
+                    </tr>
+
+                <?php } //end of while
+
+                $tot_ang_pokok=$tampok;
+                $tot_ang_bunga=$totbung;
+                $tot_jumlah=$jumlah*$lama_pinjaman;
+
+
+                ?>
+                <tr>
+                    <td></td>
+                    <td><b><?php echo buatrp($tot_ang_pokok);?></b></td>
+                    <td><b><?php echo buatrp($tot_ang_bunga);?></b></td>
+                    <td><b><?php echo buatrp($tot_jumlah);?></b></td>
+                    <td></td>
+                </tr>
+            </table>
+
+            <?php
+        }//end of else
+        ?>
+        <a class="no-print btn btn-sm btn-warning"  id="tombolExport"><span class="glyphicon glyphicon-download"></span></a>
+        <a class="no-print btn btn-sm btn-warning"  id="tombolExport" onclick="printDiv(this)"><span class="glyphicon glyphicon-print" ></span></a>
+        <iframe id="printing-frame" name="print_frame" src="about:blank" style="display:none;"></iframe>
+    </div>
+</div>
+
+    <div class="container"><br></div>
+<?php } ?> <!--end of isset -->
+
+<script src="js/jquery-2.0.1.min.js"></script>
+<script src="js/jquery.base64.js"></script>
+<script src="js/jquery.btechco.excelexport.js"></script>
+<script>
+    $(document).ready(function () {
+        $("#tombolExport").click(function () {
+            $("#ell").btechco_excelexport({
+                containerid: "ell"
+                , datatype: $datatype.Table
+            });
+        });
+    });
+</script>
+
+</body>
+</html>
